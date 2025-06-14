@@ -1,12 +1,4 @@
 import admin from 'firebase-admin';
-import * as serviceAccount from './serviceAccountKey.json';
-
-// Initialize Firebase Admin first
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
-});
-
-// Then import other modules
 import express from 'express';
 import cors from 'cors';
 import eventRoutes from './routes/eventRoutes';
@@ -14,6 +6,15 @@ import speakerRoutes from './routes/speakerRoutes';
 import sponsorRoutes from './routes/sponsorRoutes';
 import attendeeRoutes from './routes/attendeeRoutes';
 import agendaItemRoutes from './routes/agendaItemRoutes';
+
+// Initialize Firebase Admin with environment variables
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  })
+});
 
 const app = express();
 const port = process.env.PORT || 3002;
