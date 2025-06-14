@@ -1,15 +1,8 @@
 import { Router } from 'express';
-import admin from 'firebase-admin';
 import { Event } from '../models/event';
+import { db } from '../config/firebase';
 
 const router = Router();
-
-// Ensure Firebase is initialized
-if (!admin.apps.length) {
-  throw new Error('Firebase Admin not initialized');
-}
-
-const db = admin.firestore();
 const eventsCollection = db.collection('events');
 
 // Create Event
