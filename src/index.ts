@@ -14,19 +14,26 @@ console.log('Firebase Config:', {
   hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY
 });
 
-try {
-  // Initialize Firebase Admin with environment variables
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    })
-  });
-  console.log('Firebase initialized successfully');
-} catch (error) {
-  console.error('Error initializing Firebase:', error);
-  process.exit(1); // Exit if Firebase initialization fails
+// Initialize Firebase Admin with environment variables
+const firebaseConfig = {
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  })
+};
+
+// Check if Firebase is already initialized
+if (!admin.apps.length) {
+  try {
+    admin.initializeApp(firebaseConfig);
+    console.log('Firebase initialized successfully');
+  } catch (error) {
+    console.error('Error initializing Firebase:', error);
+    process.exit(1);
+  }
+} else {
+  console.log('Firebase already initialized');
 }
 
 const app = express();

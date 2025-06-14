@@ -3,6 +3,12 @@ import admin from 'firebase-admin';
 import { Event } from '../models/event';
 
 const router = Router();
+
+// Ensure Firebase is initialized
+if (!admin.apps.length) {
+  throw new Error('Firebase Admin not initialized');
+}
+
 const db = admin.firestore();
 const eventsCollection = db.collection('events');
 
@@ -22,15 +28,29 @@ router.post('/', async (req, res) => {
 // Read All Events
 router.get('/', async (req, res) => {
   try {
+    console.log('Attempting to fetch events...');
     const snapshot = await eventsCollection.get();
+    console.log('Successfully fetched events snapshot');
+    
     const events: Event[] = [];
     snapshot.forEach(doc => {
       events.push({ id: doc.id, ...doc.data() } as Event);
     });
+    console.log(`Found ${events.length} events`);
+    
     res.status(200).send(events);
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    res.status(500).send({ error: 'Failed to fetch events' });
+  } catch (error: any) {
+    console.error('Detailed error fetching events:', {
+      error: error,
+      message: error?.message,
+      code: error?.code,
+      stack: error?.stack
+    });
+    res.status(500).send({ 
+      error: 'Failed to fetch events',
+      details: error?.message,
+      code: error?.code
+    });
   }
 });
 
