@@ -22,15 +22,29 @@ router.post('/', async (req, res) => {
 // Read All Events
 router.get('/', async (req, res) => {
   try {
+    console.log('Attempting to fetch events...');
     const snapshot = await eventsCollection.get();
+    console.log('Successfully fetched events snapshot');
+    
     const events: Event[] = [];
     snapshot.forEach(doc => {
       events.push({ id: doc.id, ...doc.data() } as Event);
     });
+    console.log(`Found ${events.length} events`);
+    
     res.status(200).send(events);
   } catch (error) {
-    console.error('Error fetching events:', error);
-    res.status(500).send({ error: 'Failed to fetch events' });
+    console.error('Detailed error fetching events:', {
+      error: error,
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    res.status(500).send({ 
+      error: 'Failed to fetch events',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 

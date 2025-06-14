@@ -7,17 +7,36 @@ import sponsorRoutes from './routes/sponsorRoutes';
 import attendeeRoutes from './routes/attendeeRoutes';
 import agendaItemRoutes from './routes/agendaItemRoutes';
 
-// Initialize Firebase Admin with environment variables
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  })
+// Log environment variables (excluding private key for security)
+console.log('Firebase Config:', {
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY
 });
+
+try {
+  // Initialize Firebase Admin with environment variables
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    })
+  });
+  console.log('Firebase initialized successfully');
+} catch (error) {
+  console.error('Error initializing Firebase:', error);
+  process.exit(1); // Exit if Firebase initialization fails
+}
 
 const app = express();
 const port = process.env.PORT || 3002;
+
+// Add error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: err.message });
+});
 
 app.use(cors());
 app.use(express.json());
